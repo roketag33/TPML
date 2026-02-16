@@ -1,12 +1,14 @@
 from pyspark.sql import SparkSession
-from pyspark.ml.feature import VectorAssembler, StringIndexer
+from pyspark.ml.feature import VectorAssembler, StringIndexer, IndexToString
 from pyspark.ml.classification import RandomForestClassifier, DecisionTreeClassifier, LogisticRegression
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 from pyspark.ml import Pipeline
 import pandas as pd
+import numpy as np
 import os
 import shutil
 from pymongo import MongoClient
+from sklearn.metrics import confusion_matrix, classification_report
 
 def get_spark_session():
     """Initialise la session Spark avec le connecteur MongoDB."""
@@ -17,24 +19,55 @@ def get_spark_session():
         .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.3.0") \
         .getOrCreate()
 
-def train_and_evaluate(model, train_data, test_data, model_name):
-    """Entraîne et évalue un modèle."""
+def train_and_evaluate(model, train_data, test_data, model_name, output_dir="output/classification"):
+    """Entraîne et évalue un modèle avec matrice de confusion et recall."""
     print(f"\n--- Entraînement de {model_name} ---")
     fitted_model = model.fit(train_data)
     predictions = fitted_model.transform(test_data)
     
     evaluator_acc = MulticlassClassificationEvaluator(labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
     evaluator_f1 = MulticlassClassificationEvaluator(labelCol="labelIndex", predictionCol="prediction", metricName="f1")
+    evaluator_recall = MulticlassClassificationEvaluator(labelCol="labelIndex", predictionCol="prediction", metricName="weightedRecall")
+    evaluator_precision = MulticlassClassificationEvaluator(labelCol="labelIndex", predictionCol="prediction", metricName="weightedPrecision")
     
     accuracy = evaluator_acc.evaluate(predictions)
     f1 = evaluator_f1.evaluate(predictions)
+    recall = evaluator_recall.evaluate(predictions)
+    precision = evaluator_precision.evaluate(predictions)
     
     print(f"{model_name} - Accuracy: {accuracy:.4f}")
+    print(f"{model_name} - Precision: {precision:.4f}")
+    print(f"{model_name} - Recall: {recall:.4f}")
     print(f"{model_name} - F1 Score: {f1:.4f}")
+    
+    # --- Matrice de Confusion ---
+    pred_rows = predictions.select("labelIndex", "prediction").collect()
+    y_true = [int(row["labelIndex"]) for row in pred_rows]
+    y_pred = [int(row["prediction"]) for row in pred_rows]
+    
+    labels_unique = sorted(set(y_true + y_pred))
+    cm = confusion_matrix(y_true, y_pred, labels=labels_unique)
+    
+    print(f"\nMatrice de Confusion ({model_name}):")
+    cm_df = pd.DataFrame(cm, index=[f"Réel_{i}" for i in labels_unique], columns=[f"Prédit_{i}" for i in labels_unique])
+    print(cm_df)
+    
+    # Sauvegarde de la matrice
+    os.makedirs(output_dir, exist_ok=True)
+    safe_name = model_name.replace(" ", "_").lower()
+    cm_df.to_csv(f"{output_dir}/confusion_matrix_{safe_name}.csv")
+    
+    # Rapport de classification détaillé
+    report = classification_report(y_true, y_pred, target_names=[f"Class_{i}" for i in labels_unique], output_dict=True)
+    report_df = pd.DataFrame(report).transpose()
+    report_df.to_csv(f"{output_dir}/classification_report_{safe_name}.csv")
+    print(f"Rapport détaillé sauvegardé dans {output_dir}/classification_report_{safe_name}.csv")
     
     return {
         "Model": model_name,
         "Accuracy": accuracy,
+        "Precision": precision,
+        "Recall": recall,
         "F1 Score": f1
     }
 
