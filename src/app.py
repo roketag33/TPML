@@ -77,7 +77,7 @@ st.sidebar.header("Options")
 refresh = st.sidebar.button("Recharger les données")
 if refresh:
     load_data.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # Chargement
 db, redis_client = init_connections()
