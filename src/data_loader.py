@@ -6,11 +6,16 @@ from cassandra.cluster import Cluster
 import time
 
 def load_iris_dataset():
-    """Charge le dataset Iris et le retourne sous forme de DataFrame Pandas."""
-    iris = load_iris()
-    df = pd.DataFrame(data=iris.data, columns=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'])
-    df['species'] = pd.Categorical.from_codes(iris.target, iris.target_names)
-    return df
+    """Charge le dataset Iris depuis le fichier local 'data_source/iris.data'."""
+    column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species']
+    try:
+        df = pd.read_csv('data_source/iris.data', header=None, names=column_names)
+        # Nettoyage des lignes vides potentielles
+        df.dropna(inplace=True)
+        return df
+    except FileNotFoundError:
+        print("Erreur: Le fichier 'data_source/iris.data' est introuvable.")
+        return pd.DataFrame()
 
 def transform_to_mongodb_document(row, id_val):
     """Transforme une ligne du DataFrame en document MongoDB."""

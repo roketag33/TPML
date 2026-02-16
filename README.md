@@ -24,8 +24,13 @@ pip install -r requirements.txt
 
 ## 🧪 Tests & Exécution
 
-### Étape 1 : Chargement des Données
-Peuple les 3 bases de données simultanément :
+### Étape 1 : Préparation & Chargement des Données
+Le projet utilise le fichier local `iris.zip`.
+1. Décompressez les données :
+```bash
+unzip -o iris.zip -d data_source
+```
+2. Peuplez les bases de données :
 ```bash
 .venv/bin/python src/data_loader.py
 ```
