@@ -43,7 +43,7 @@ services:
 
   # --- Big Data: Spark Master ---
   spark-master:
-    image: bitnami/spark:latest
+    image: apache/spark:3.5.0
     container_name: tpml-spark-master
     environment:
       - SPARK_MODE=master
@@ -59,7 +59,7 @@ services:
 
   # --- Big Data: Spark Worker ---
   spark-worker:
-    image: bitnami/spark:latest
+    image: apache/spark:3.5.0
     container_name: tpml-spark-worker
     environment:
       - SPARK_MODE=worker
