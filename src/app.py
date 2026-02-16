@@ -65,7 +65,17 @@ def train_demo_model(df):
     
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
     clf.fit(X, y)
+    clf.fit(X, y)
     return clf
+
+@st.cache_resource
+def load_image_model():
+    """Charge le pipeline de classification d'images (ViT)."""
+    try:
+        from transformers import pipeline
+        return pipeline("image-classification", model="google/vit-base-patch16-224")
+    except Exception as e:
+        return None
 
 # --- Interface Utilisateur ---
 
@@ -89,7 +99,7 @@ else:
     model = train_demo_model(df)
     
     # Tabs
-    tab1, tab2, tab3 = st.tabs(["📊 Analyse Exploratoire (EDA)", "🔮 Prédiction & Cache", "📈 Performance Spark"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Analyse Exploratoire (EDA)", "🔮 Prédiction & Cache", "📈 Performance Spark", "📷 Vision par Ordinateur"])
     
     with tab1:
         st.header("Analyse Exploratoire des Données")
@@ -168,3 +178,36 @@ else:
             st.image(bench_img, caption="Comparaison des performances (Opérations/seconde)", use_column_width=True)
         else:
             st.info("Pas d'image de benchmark trouvée.")
+
+    with tab4:
+        st.header("Reconnaissance d'Images (Computer Vision)")
+        st.markdown("Ce module utilise un **Vision Transformer (ViT)** pré-entraîné pour identifier les fleurs à partir d'une photo.")
+        
+        uploaded_file = st.file_uploader("Choisissez une image de fleur...", type=["jpg", "jpeg", "png"])
+        
+        if uploaded_file is not None:
+            from PIL import Image
+            image = Image.open(uploaded_file)
+            st.image(image, caption='Image importée', use_column_width=True)
+            
+            st.write("Analyse en cours...")
+            
+            with st.spinner('Chargement du modèle IA...'):
+                classifier = load_image_model()
+                if classifier:
+                    predictions = classifier(image)
+                    st.success("Analyse terminée !")
+                    
+                    # Formattage et affichage
+                    res_data = [{"Label": p['label'], "Confiance": p['score']} for p in predictions]
+                    df_res = pd.DataFrame(res_data)
+                    st.dataframe(df_res.style.format({"Confiance": "{:.2%}"}).highlight_max(subset=['Confiance'], color='lightgreen'))
+                    
+                    top_label = predictions[0]['label']
+                    if 'iris' in top_label.lower():
+                        st.balloons()
+                        st.success(f"🌸 C'est probablement un **Iris** ! ({top_label})")
+                    else:
+                        st.info(f"C'est une fleur de type : **{top_label}**")
+                else:
+                    st.error("Erreur lors du chargement du modèle Vision.")
