@@ -59,14 +59,6 @@ def train_demo_model(df):
     clf.fit(X, y)
     return clf
 
-@st.cache_resource
-def load_image_model():
-    """Charge le pipeline de classification d'images (ViT)."""
-    try:
-        from transformers import pipeline
-        return pipeline("image-classification", model="google/vit-base-patch16-224")
-    except Exception as e:
-        return None
 
 # --- Chargement initial des ressources ---
 db, redis_client = init_connections()
@@ -82,8 +74,7 @@ page = st.sidebar.radio(
     [
         "1. 📊 Analyse Exploratoire (EDA)",
         "2. 🔮 Prédiction & Cache Redis", 
-        "3. 📈 Performance & Big Data",
-        "4. 📷 Vision par Ordinateur"
+        "3. 📈 Performance & Big Data"
     ]
 )
 
@@ -228,54 +219,3 @@ elif page == "3. 📈 Performance & Big Data":
     else:
         st.warning("Le graphique de benchmark n'est pas disponible. Lancez `benchmark_suite.py`.")
 
-elif page == "4. 📷 Vision par Ordinateur":
-    st.header("📷 Reconnaissance d'Images (Vision par Ordinateur)")
-    
-    with st.expander("📘 **Comprendre cette section (Aide)**", expanded=True):
-        st.markdown("""
-        **À quoi ça sert ?**
-        C'est une fonctionnalité bonus utilisant le **Deep Learning** moderne (Transformers).
-        Contrairement aux onglets précédents qui utilisaient des mesures (chiffres), ici l'IA "regarde" une photo.
-        
-        **Technologie :** Vision Transformer (ViT) de Google. C'est un réseau de neurones qui découpe l'image en morceaux pour l'analyser.
-        
-        **Essayez !** Importez une photo de fleur (téléchargée sur Google Images) et voyez si l'IA la reconnaît.
-        """)
-        
-    uploaded_file = st.file_uploader("📥 Déposez une image de fleur ici (JPG, PNG)...", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file is not None:
-        from PIL import Image
-        image = Image.open(uploaded_file)
-        
-        col_img, col_an = st.columns(2)
-        with col_img:
-            st.image(image, caption='Votre image', use_column_width=True)
-        
-        with col_an:
-            st.write("🤖 **L'IA analyse l'image...**")
-            with st.spinner('Chargement du modèle Vision Transformer...'):
-                classifier = load_image_model()
-                if classifier:
-                    predictions = classifier(image)
-                    st.success("Analyse terminée !")
-                    
-                    # Top prédiction
-                    top_p = predictions[0]
-                    confidence = top_p['score']
-                    label = top_p['label']
-                    
-                    if confidence > 0.7:
-                        st.balloons()
-                        st.markdown(f"### 🌸 Résultat : **{label}**")
-                        st.markdown(f"**Confiance : {confidence:.1%}**")
-                    else:
-                        st.markdown(f"### 🤔 Résultat incertain : **{label}**")
-                        st.caption(f"Confiance faible ({confidence:.1%}). L'image est peut-être floue ou ce n'est pas une fleur connue.")
-                    
-                    # Tableau détaillé
-                    st.markdown("#### Détails des probabilités :")
-                    res_data = [{"Fleur": p['label'], "Probabilité": p['score']} for p in predictions]
-                    st.dataframe(pd.DataFrame(res_data).style.format({"Probabilité": "{:.2%}"}))
-                else:
-                    st.error("Impossible de charger le modèle de vision. Vérifiez votre connexion internet pour télécharger les poids du modèle.")

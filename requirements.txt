@@ -9,6 +9,3 @@ scikit-learn>=1.4.0
 statsmodels>=0.14.0
 pyspark==3.5.1
 streamlit>=1.30.0
-torch
-transformers
-pillow
