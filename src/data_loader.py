@@ -81,14 +81,16 @@ def main():
             WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }
         """)
         cassandra_session.set_keyspace('tpml_g2')
+        cassandra_session.execute("DROP TABLE IF EXISTS iris") # Force recreate for schema change
         cassandra_session.execute("""
             CREATE TABLE IF NOT EXISTS iris (
-                id text PRIMARY KEY,
+                id text,
                 sepal_length float,
                 sepal_width float,
                 petal_length float,
                 petal_width float,
-                species text
+                species text,
+                PRIMARY KEY ((species), id)
             )
         """)
     else:
