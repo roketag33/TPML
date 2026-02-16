@@ -1,0 +1,27 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:           petal_length   R-squared:                       0.968
+Model:                            OLS   Adj. R-squared:                  0.967
+Method:                 Least Squares   F-statistic:                     1473.
+Date:                Mon, 16 Feb 2026   Prob (F-statistic):          6.98e-109
+Time:                        11:08:57   Log-Likelihood:                -39.408
+No. Observations:                 150   AIC:                             86.82
+Df Residuals:                     146   BIC:                             98.86
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+const           -0.2627      0.297     -0.883      0.379      -0.850       0.325
+sepal_length     0.7291      0.058     12.502      0.000       0.614       0.844
+sepal_width     -0.6460      0.068     -9.431      0.000      -0.781      -0.511
+petal_width      1.4468      0.068     21.399      0.000       1.313       1.580
+==============================================================================
+Omnibus:                        2.520   Durbin-Watson:                   1.783
+Prob(Omnibus):                  0.284   Jarque-Bera (JB):                2.391
+Skew:                           0.073   Prob(JB):                        0.303
+Kurtosis:                       3.601   Cond. No.                         79.3
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.

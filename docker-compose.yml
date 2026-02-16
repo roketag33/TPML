@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # --- NoSQL Document: MongoDB ---
+  mongo:
+    image: mongo:latest
+    container_name: tpml-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - tpml-network
+
+  # --- NoSQL Wide Column: Cassandra ---
+  cassandra:
+    image: cassandra:latest
+    container_name: tpml-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TPML_Cluster
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - tpml-network
+    healthcheck:
+      test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ] || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # --- NoSQL Key-Value: Redis ---
+  redis:
+    image: redis:latest
+    container_name: tpml-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tpml-network
+
+  # --- Big Data: Spark Master ---
+  spark-master:
+    image: bitnami/spark:latest
+    container_name: tpml-spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - '8080:8080'
+      - '7077:7077'
+    networks:
+      - tpml-network
+
+  # --- Big Data: Spark Worker ---
+  spark-worker:
+    image: bitnami/spark:latest
+    container_name: tpml-spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    depends_on:
+      - spark-master
+    networks:
+      - tpml-network
+
+volumes:
+  mongo_data:
+  cassandra_data:
+  redis_data:
+
+networks:
+  tpml-network:
+    driver: bridge
