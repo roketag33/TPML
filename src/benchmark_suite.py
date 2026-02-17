@@ -14,12 +14,14 @@ NUM_OPERATIONS = 1000
 RESULTS_FILE = "output/benchmark/results.csv"
 
 def get_mongo_conn():
-    client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+    client = MongoClient(mongo_uri)
     return client["tpml_benchmark"]["test_col"]
 
 def get_cassandra_conn():
     try:
-        cluster = Cluster(['localhost'])
+        cassandra_host = os.getenv("CASSANDRA_HOST", "localhost")
+        cluster = Cluster([cassandra_host])
         session = cluster.connect()
         session.execute("CREATE KEYSPACE IF NOT EXISTS tpml_bench WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }")
         session.set_keyspace('tpml_bench')
@@ -30,7 +32,8 @@ def get_cassandra_conn():
         return None
 
 def get_redis_conn():
-    return redis.Redis(host='localhost', port=6379, decode_responses=True)
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    return redis.Redis(host=redis_host, port=6379, decode_responses=True)
 
 def benchmark_mongo(col):
     if col is None: return None, None

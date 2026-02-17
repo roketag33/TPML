@@ -16,11 +16,15 @@ st.set_page_config(page_title="Iris Classification - TPML", layout="wide", page_
 def init_connections():
     """Initialise les connexions aux bases de données."""
     try:
-        mongo_client = MongoClient("mongodb://localhost:27017/")
+        # Configuration dynamique via variables d'environnement (Support Docker/VPS)
+        mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        
+        mongo_client = MongoClient(mongo_uri)
         mongo_client.server_info() # Test connexion
         db = mongo_client["tpml_iris"]
         
-        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        redis_client = redis.Redis(host=redis_host, port=6379, decode_responses=True)
         redis_client.ping() # Test connexion
         
         return db, redis_client

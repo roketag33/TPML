@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import redis
 from cassandra.cluster import Cluster
 import time
+import os
 
 def load_iris_dataset():
     """Charge le dataset Iris depuis le fichier local 'data_source/iris.data'."""
@@ -58,7 +59,8 @@ def main():
     
     # 1. Connexion aux bases de données
     print("Connexion à MongoDB...")
-    mongo_client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+    mongo_client = MongoClient(mongo_uri)
     mongo_db = mongo_client["tpml_iris"]
     mongo_col = mongo_db["iris_data"]
     
@@ -67,7 +69,8 @@ def main():
     cassandra_session = None
     for i in range(10):
         try:
-            cluster = Cluster(['localhost'])
+            cassandra_host = os.getenv("CASSANDRA_HOST", "localhost")
+            cluster = Cluster([cassandra_host])
             cassandra_session = cluster.connect()
             print("Cassandra connecté !")
             break
@@ -97,7 +100,8 @@ def main():
         print("ECHEC connexion Cassandra - Insertion annulée pour Cassandra")
 
     print("Connexion à Redis...")
-    redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    redis_client = redis.Redis(host=redis_host, port=6379, decode_responses=True)
 
     # 2. Chargement et Transformation
     df = load_iris_dataset()

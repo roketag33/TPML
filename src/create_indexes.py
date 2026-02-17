@@ -1,9 +1,12 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
+import os
+
 def create_indexes():
     print("--- Optimisation MongoDB : Création d'Index ---")
     try:
-        client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+        mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
+        client = MongoClient(mongo_uri)
         db = client["tpml_iris"]
         collection = db["iris_data"]
         
