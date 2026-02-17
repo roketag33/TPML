@@ -25,6 +25,7 @@ services:
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=tpml-scope"
       # --- Traefik Configuration ---
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -116,9 +117,11 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
-      - WATCHTOWER_LABEL_ENABLE=true # IMPORTANT : Ne met à jour que les conteneurs avec le label
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_SCOPE=tpml-scope # ISOLATION TOTALE
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=tpml-scope"
     networks:
       - tpml-network
     restart: always
