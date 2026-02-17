@@ -42,8 +42,6 @@ services:
       - mongo1_data:/data/db
     networks:
       - tpml-network
-    networks:
-      - tpml-network
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -56,8 +54,6 @@ services:
       - mongo2_data:/data/db
     networks:
       - tpml-network
-    networks:
-      - tpml-network
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -68,8 +64,6 @@ services:
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     volumes:
       - mongo3_data:/data/db
-    networks:
-      - tpml-network
     networks:
       - tpml-network
     restart: always
@@ -88,8 +82,6 @@ services:
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
     volumes:
       - cassandra_data:/var/lib/cassandra
-    networks:
-      - tpml-network
     networks:
       - tpml-network
     restart: always
@@ -111,8 +103,6 @@ services:
       - redis_data:/data
     networks:
       - tpml-network
-    networks:
-      - tpml-network
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -123,8 +113,6 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_CLEANUP=true
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
