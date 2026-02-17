@@ -6,7 +6,7 @@ services:
     # build:  <-- On remplace le build local par l'image distante pour Watchtower
     #   context: .
     #   dockerfile: Dockerfile
-    image: ghcr.io/votre-user/tpml:latest # ⚠️ REMPLACEZ 'votre-user' PAR VOTRE USERNAME GITHUB
+    image: ghcr.io/roketag33/tpml:latest # Image construite par GitHub Actions
     ports:
       - "8501:8501"  # Streamlit
     environment:
