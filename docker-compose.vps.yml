@@ -106,7 +106,6 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
-    command: --lifecycle-hooks # Active les hooks si besoin
     networks:
       - tpml-network
     restart: always
