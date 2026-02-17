@@ -21,9 +21,17 @@ services:
       - redis
     networks:
       - tpml-network
+      - proxy
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      # --- Traefik Configuration ---
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.tpml-app.rule=Host(`nosql.lootopia-server.roketlab.duckdns.org`)"
+      - "traefik.http.routers.tpml-app.entrypoints=websecure"
+      - "traefik.http.routers.tpml-app.tls.certresolver=myresolver" # Adaptez 'myresolver' si votre resolver s'appelle autrement (ex: letsencrypt)
+      - "traefik.http.services.tpml-app.loadbalancer.server.port=8501"
 
   # --- NoSQL Document: MongoDB Replica Set ---
   mongo1:
@@ -113,3 +121,5 @@ volumes:
 networks:
   tpml-network:
     driver: bridge
+  proxy:
+    external: true
