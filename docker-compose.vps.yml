@@ -42,7 +42,11 @@ services:
       - mongo1_data:/data/db
     networks:
       - tpml-network
+    networks:
+      - tpml-network
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   mongo2:
     image: mongo:latest
@@ -52,7 +56,11 @@ services:
       - mongo2_data:/data/db
     networks:
       - tpml-network
+    networks:
+      - tpml-network
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   mongo3:
     image: mongo:latest
@@ -62,7 +70,11 @@ services:
       - mongo3_data:/data/db
     networks:
       - tpml-network
+    networks:
+      - tpml-network
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   # --- NoSQL Wide Column: Cassandra ---
   cassandra:
@@ -78,7 +90,11 @@ services:
       - cassandra_data:/var/lib/cassandra
     networks:
       - tpml-network
+    networks:
+      - tpml-network
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     healthcheck:
       test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ] || exit 1"]
       interval: 30s
@@ -95,7 +111,11 @@ services:
       - redis_data:/data
     networks:
       - tpml-network
+    networks:
+      - tpml-network
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   # --- Auto-Updater: Watchtower ---
   watchtower:
@@ -105,7 +125,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true
+    environment:
+      - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
+      - WATCHTOWER_LABEL_ENABLE=true # IMPORTANT : Ne met à jour que les conteneurs avec le label
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - tpml-network
     restart: always
