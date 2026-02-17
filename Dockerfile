@@ -1,13 +1,11 @@
-# Utiliser une image Python officielle légère
-FROM python:3.10-slim
+# Utiliser une image Python officielle complète (plus sûre pour Java/Spark)
+FROM python:3.10
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Installer OpenJDK 17 (requis pour PySpark) et les dépendances système de base
-# Fix: création du répertoire man pour éviter l'erreur d'installation OpenJDK sur slim
-RUN mkdir -p /usr/share/man/man1 && \
-    apt-get update && \
+# Installer OpenJDK 17 (requis pour PySpark)
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     procps \
