@@ -1,23 +1,29 @@
-# Utiliser une image Python officielle complète (plus sûre pour Java/Spark)
-FROM python:3.10
+# --- Étape 1 : Récupérer Java depuis une image officielle stable ---
+FROM eclipse-temurin:17-jre as java-stage
+
+# --- Étape 2 : Image Principale Python ---
+FROM python:3.10-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Installer OpenJDK 17 (requis pour PySpark)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    openjdk-17-jre-headless \
-    procps \
-    && rm -rf /var/lib/apt/lists/*
+# Copier Java depuis l'étape 1 (Plus robuste que apt-get)
+COPY --from=java-stage /opt/java/openjdk /opt/java/openjdk
 
-# Définir JAVA_HOME
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+# Configurer les variables d'environnement pour Java
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Installer les dépendances système minimales (procps est souvent requis par Spark)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends procps && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copier le fichier des dépendances
 COPY requirements.txt .
 
 # Installer les dépendances Python
+# Utilisation de --no-cache-dir pour réduire la taille de l'image
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier tout le code source
