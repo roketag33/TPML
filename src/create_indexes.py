@@ -3,7 +3,7 @@ from pymongo import MongoClient, ASCENDING, DESCENDING
 def create_indexes():
     print("--- Optimisation MongoDB : Création d'Index ---")
     try:
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
         db = client["tpml_iris"]
         collection = db["iris_data"]
         

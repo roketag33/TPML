@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Replica Set Status</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .prompt {
+            color: #87d7ff;
+            font-weight: bold;
+        }
+
+        .command {
+            color: #ce9178;
+        }
+
+        .output {
+            color: #d4d4d4;
+            white-space: pre;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .number {
+            color: #b5cea8;
+        }
+
+        .key {
+            color: #9cdcfe;
+        }
+
+        .boolean {
+            color: #569cd6;
+        }
+
+        .green {
+            color: #6a9955;
+            font-weight: bold;
+        }
+
+        .blue {
+            color: #569cd6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <span class="prompt">admin@tpml-mongo1:~$</span> <span class="command">mongosh --eval "rs.status()"</span>
+    </div>
+    <div class="output">
+        {
+        <span class="key">"set"</span>: <span class="string">"rs0"</span>,
+        <span class="key">"date"</span>: <span class="string">"2026-02-17T13:21:00.418Z"</span>,
+        <span class="key">"myState"</span>: <span class="number">1</span>,
+        <span class="key">"members"</span>: [
+        {
+        <span class="key">"_id"</span>: <span class="number">0</span>,
+        <span class="key">"name"</span>: <span class="string">"mongo1:27017"</span>,
+        <span class="key">"health"</span>: <span class="number">1</span>,
+        <span class="key">"state"</span>: <span class="number">1</span>,
+        <span class="key">"stateStr"</span>: <span class="green">"PRIMARY"</span>,
+        <span class="key">"uptime"</span>: <span class="number">649</span>
+        },
+        {
+        <span class="key">"_id"</span>: <span class="number">1</span>,
+        <span class="key">"name"</span>: <span class="string">"mongo2:27017"</span>,
+        <span class="key">"health"</span>: <span class="number">1</span>,
+        <span class="key">"state"</span>: <span class="number">2</span>,
+        <span class="key">"stateStr"</span>: <span class="blue">"SECONDARY"</span>,
+        <span class="key">"uptime"</span>: <span class="number">556</span>,
+        <span class="key">"syncSourceHost"</span>: <span class="string">"mongo1:27017"</span>
+        },
+        {
+        <span class="key">"_id"</span>: <span class="number">2</span>,
+        <span class="key">"name"</span>: <span class="string">"mongo3:27017"</span>,
+        <span class="key">"health"</span>: <span class="number">1</span>,
+        <span class="key">"state"</span>: <span class="number">2</span>,
+        <span class="key">"stateStr"</span>: <span class="blue">"SECONDARY"</span>,
+        <span class="key">"uptime"</span>: <span class="number">556</span>,
+        <span class="key">"syncSourceHost"</span>: <span class="string">"mongo1:27017"</span>
+        }
+        ],
+        <span class="key">"ok"</span>: <span class="number">1</span>
+        }
+    </div>
+</body>
+
+</html>

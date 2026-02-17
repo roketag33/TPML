@@ -1,39 +1,60 @@
 version: '3.8'
 
 services:
+  # --- Applications ---
+  tpml-app:
+    # build:  <-- On remplace le build local par l'image distante pour Watchtower
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/votre-user/tpml:latest # ⚠️ REMPLACEZ 'votre-user' PAR VOTRE USERNAME GITHUB
+    ports:
+      - "8501:8501"  # Streamlit
+    environment:
+      - MONGO_URI=mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0
+      - CASSANDRA_HOST=cassandra
+      - REDIS_HOST=redis
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+      - cassandra
+      - redis
+    networks:
+      - tpml-network
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
   # --- NoSQL Document: MongoDB Replica Set ---
   mongo1:
     image: mongo:latest
     container_name: tpml-mongo1
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    ports:
-      - "27017:27017"
     volumes:
       - mongo1_data:/data/db
     networks:
       - tpml-network
+    restart: always
 
   mongo2:
     image: mongo:latest
     container_name: tpml-mongo2
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    ports:
-      - "27018:27017"
     volumes:
       - mongo2_data:/data/db
     networks:
       - tpml-network
+    restart: always
 
   mongo3:
     image: mongo:latest
     container_name: tpml-mongo3
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    ports:
-      - "27019:27017"
     volumes:
       - mongo3_data:/data/db
     networks:
       - tpml-network
+    restart: always
 
   # --- NoSQL Wide Column: Cassandra ---
   cassandra:
@@ -42,11 +63,14 @@ services:
     ports:
       - "9042:9042"
     environment:
-      - CASSANDRA_CLUSTER_NAME=TPML_Cluster
+      - CASSANDRA_CLUSTER_NAME=TPMLCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
     volumes:
       - cassandra_data:/var/lib/cassandra
     networks:
       - tpml-network
+    restart: always
     healthcheck:
       test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ] || exit 1"]
       interval: 30s
@@ -63,40 +87,21 @@ services:
       - redis_data:/data
     networks:
       - tpml-network
+    restart: always
 
-  # --- Big Data: Spark Master ---
-  spark-master:
-    image: apache/spark:3.5.0
-    container_name: tpml-spark-master
+  # --- Auto-Updater: Watchtower ---
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - SPARK_MODE=master
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
-    ports:
-      - '8080:8080'
-      - '7077:7077'
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
+    command: --lifecycle-hooks # Active les hooks si besoin
     networks:
       - tpml-network
-
-  # --- Big Data: Spark Worker ---
-  spark-worker:
-    image: apache/spark:3.5.0
-    container_name: tpml-spark-worker
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=1G
-      - SPARK_WORKER_CORES=1
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
-    depends_on:
-      - spark-master
-    networks:
-      - tpml-network
+    restart: always
 
 volumes:
   mongo1_data:

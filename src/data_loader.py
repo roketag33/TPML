@@ -58,7 +58,7 @@ def main():
     
     # 1. Connexion aux bases de données
     print("Connexion à MongoDB...")
-    mongo_client = MongoClient("mongodb://localhost:27017/")
+    mongo_client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
     mongo_db = mongo_client["tpml_iris"]
     mongo_col = mongo_db["iris_data"]
     

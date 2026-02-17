@@ -14,8 +14,8 @@ def get_spark_session():
     """Initialise la session Spark avec le connecteur MongoDB."""
     return SparkSession.builder \
         .appName("TPML_Iris_Classification") \
-        .config("spark.mongodb.read.connection.uri", "mongodb://localhost:27017/tpml_iris.iris_data") \
-        .config("spark.mongodb.write.connection.uri", "mongodb://localhost:27017/tpml_iris.iris_predictions") \
+        .config("spark.mongodb.read.connection.uri", "mongodb://localhost:27017,localhost:27018,localhost:27019/tpml_iris.iris_data?replicaSet=rs0") \
+        .config("spark.mongodb.write.connection.uri", "mongodb://localhost:27017,localhost:27018,localhost:27019/tpml_iris.iris_predictions?replicaSet=rs0") \
         .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.3.0") \
         .getOrCreate()
 
@@ -170,7 +170,7 @@ def main():
         
         print(f"Sauvegarde de {len(rows_to_save)} prédictions dans MongoDB (via PyMongo)...")
         
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
         db_mongo = client["tpml_iris"]
         col_pred = db_mongo["iris_predictions"]
         col_pred.delete_many({}) # Clean old

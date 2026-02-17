@@ -14,7 +14,7 @@ NUM_OPERATIONS = 1000
 RESULTS_FILE = "output/benchmark/results.csv"
 
 def get_mongo_conn():
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0")
     return client["tpml_benchmark"]["test_col"]
 
 def get_cassandra_conn():
