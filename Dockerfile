@@ -19,6 +19,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends procps && \
     rm -rf /var/lib/apt/lists/*
 
+# Copier explicitement les données (Correction bug manquant)
+COPY data_source ./data_source
+
 # Copier le fichier des dépendances
 COPY requirements.txt .
 
