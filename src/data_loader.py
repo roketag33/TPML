@@ -9,8 +9,11 @@ import os
 def load_iris_dataset():
     """Charge le dataset Iris depuis le fichier local 'data_source/iris.data'."""
     column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species']
+    # Chemin absolu basé sur la racine du projet (compatible Docker & local)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_path = os.path.join(project_root, 'data_source', 'iris.data')
     try:
-        df = pd.read_csv('data_source/iris.data', header=None, names=column_names)
+        df = pd.read_csv(data_path, header=None, names=column_names)
         # Nettoyage des lignes vides potentielles
         df.dropna(inplace=True)
         return df

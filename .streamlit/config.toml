@@ -8,5 +8,3 @@ enableWebsocketCompression = false
 
 [browser]
 gatherUsageStats = false
-serverAddress = "nosql.lootopia-server.roketlab.duckdns.org"
-serverPort = 443
