@@ -29,8 +29,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier tout le code source
 COPY . .
 
+# Copier et rendre exécutable le script d'entrée
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Exposer le port de Streamlit
 EXPOSE 8501
 
-# Commande de démarrage
-CMD ["streamlit", "run", "src/app.py", "--server.address=0.0.0.0"]
+# Script d'entrée : charge les données si nécessaire, puis lance Streamlit
+ENTRYPOINT ["/docker-entrypoint.sh"]
