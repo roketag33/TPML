@@ -13,6 +13,9 @@ services:
       - MONGO_URI=mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0
       - CASSANDRA_HOST=cassandra
       - REDIS_HOST=redis
+      - STREAMLIT_SERVER_ENABLE_CORS=false
+      - STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
     depends_on:
       - mongo1
       - mongo2
@@ -31,8 +34,11 @@ services:
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.tpml-app.rule=Host(`nosql.lootopia-server.roketlab.duckdns.org`)"
       - "traefik.http.routers.tpml-app.entrypoints=websecure"
-      - "traefik.http.routers.tpml-app.tls.certresolver=myresolver" # Adaptez 'myresolver' si votre resolver s'appelle autrement (ex: letsencrypt)
+      - "traefik.http.routers.tpml-app.tls.certresolver=myresolver"
       - "traefik.http.services.tpml-app.loadbalancer.server.port=8501"
+      # --- Middleware pour WebSocket ---
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.tpml-app.middlewares=sslheader"
 
   # --- NoSQL Document: MongoDB Replica Set ---
   mongo1:
@@ -116,7 +122,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=300 # Vérifie toutes les 5 minutes
+      - WATCHTOWER_POLL_INTERVAL=10 # Vérifie toutes les 5 minutes
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_SCOPE=tpml-scope # ISOLATION TOTALE
     labels:

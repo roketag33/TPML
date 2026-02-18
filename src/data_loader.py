@@ -18,7 +18,18 @@ def load_iris_dataset():
         df.dropna(inplace=True)
         return df
     except FileNotFoundError:
-        print("Erreur: Le fichier 'data_source/iris.data' est introuvable.")
+        print(f"❌ ERREUR FATALE: Le fichier '{data_path}' est introuvable.")
+        print(f"📂 CWD: {os.getcwd()}")
+        print(f"📂 Project Root: {project_root}")
+        try:
+            print(f"📂 Contenu de Project Root : {os.listdir(project_root)}")
+            ds_path = os.path.join(project_root, 'data_source')
+            if os.path.exists(ds_path):
+                print(f"📂 Contenu de data_source : {os.listdir(ds_path)}")
+            else:
+                print(f"❌ Le dossier 'data_source' n'existe pas à : {ds_path}")
+        except Exception as e:
+            print(f"Erreur lors du listing des fichiers : {e}")
         return pd.DataFrame()
 
 def transform_to_mongodb_document(row, id_val):
